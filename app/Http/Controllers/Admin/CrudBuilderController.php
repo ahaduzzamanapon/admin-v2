@@ -336,6 +336,9 @@ class CrudBuilderController extends Controller
                     }
                 }
             }
+            if (!$first) {
+                $searchLogic = rtrim($searchLogic) . ";\n";
+            }
             $searchLogic .= "            });\n";
             $searchLogic .= "        }\n";
             $searchLogic .= "        \$items = \$query->paginate(10);";
