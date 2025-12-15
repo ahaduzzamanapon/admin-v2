@@ -13,7 +13,7 @@
         
         {{-- Presets Section --}}
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Theme Presets</h6>
                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#savePresetModal">
                     <i class="bi bi-save me-1"></i> Save Current as Preset

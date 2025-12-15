@@ -21,7 +21,7 @@
             {{-- General Colors --}}
             <div class="col-md-6 mb-4">
                 <div class="card shadow">
-                    <div class="card-header py-3">
+                    <div class="card-header bg-white py-3">
                         <h6 class="m-0 font-weight-bold text-primary">General Colors</h6>
                     </div>
                     <div class="card-body">
@@ -68,7 +68,7 @@
             {{-- Navbar Settings --}}
             <div class="col-md-6 mb-4">
                 <div class="card shadow">
-                    <div class="card-header py-3">
+                    <div class="card-header bg-white py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Navbar Settings</h6>
                     </div>
                     <div class="card-body">
@@ -97,7 +97,7 @@
             {{-- Sidebar Colors --}}
             <div class="col-md-6 mb-4">
                 <div class="card shadow">
-                    <div class="card-header py-3">
+                    <div class="card-header bg-white py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Sidebar Settings</h6>
                     </div>
                     <div class="card-body">
@@ -153,7 +153,7 @@
             {{-- Component Colors --}}
             <div class="col-md-6 mb-4">
                 <div class="card shadow">
-                    <div class="card-header py-3">
+                    <div class="card-header bg-white py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Component Colors</h6>
                     </div>
                     <div class="card-body">
@@ -191,7 +191,7 @@
             {{-- Typography --}}
             <div class="col-md-6 mb-4">
                 <div class="card shadow">
-                    <div class="card-header py-3">
+                    <div class="card-header bg-white py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Typography</h6>
                     </div>
                     <div class="card-body">

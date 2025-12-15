@@ -2,14 +2,13 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0 text-gray-800 fw-bold">Edit {{ modelName }}</h5>
-        <a href="{{ route('admin.{{ modelVariablePlural }}.index') }}" class="btn btn-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Back
-        </a>
-    </div>
-
     <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-gray-800 fw-bold">Edit {{ modelName }}</h5>
+            <a href="{{ route('admin.{{ modelVariablePlural }}.index') }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+        </div>
         <div class="card-body p-4">
             <form action="{{ route('admin.{{ modelVariablePlural }}.update', $item->id) }}" method="POST" {{ enctype }}>
                 @csrf

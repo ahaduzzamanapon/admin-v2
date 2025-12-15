@@ -187,6 +187,7 @@
         display: flex;
         flex-direction: column;
         padding-bottom: 1rem;
+        overflow-y: auto;
     }
 
     /* Make the main card take available space */
