@@ -422,10 +422,9 @@ class CrudBuilderController extends Controller
         // Inject Search Form
         $searchForm = '';
         if ($searchable) {
-            $searchForm = '            <form action="{{ route(\'admin.' . $modelVariablePlural . '.index\') }}" method="GET" class="d-flex gap-2">';
-            $searchForm .= '                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request(\'search\') }}">';
-            $searchForm .= '                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>';
-            $searchForm .= '            </form>';
+            $searchForm = '            <div class="d-flex gap-2">';
+            $searchForm .= '                <input type="text" id="searchInput" name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request(\'search\') }}">';
+            $searchForm .= '            </div>';
         }
         $replacements['{{ searchForm }}'] = $searchForm;
 
@@ -473,6 +472,11 @@ class CrudBuilderController extends Controller
 
         $indexContent = str_replace(array_keys($replacements), array_values($replacements), $indexStub);
         File::put($viewDirectory . '/index.blade.php', $indexContent);
+
+        // Generate Table Partial
+        $tableStub = File::get(resource_path('stubs/table.stub'));
+        $tableContent = str_replace(array_keys($replacements), array_values($replacements), $tableStub);
+        File::put($viewDirectory . '/table.blade.php', $tableContent);
 
         // Generate PDF View
         if ($exportable) {

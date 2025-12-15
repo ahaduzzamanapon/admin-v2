@@ -20,47 +20,51 @@
                 </a>
             </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">ID</th>
-{{ tableHeaders }}
-                            <th style="width: 150px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($items as $item)
-                        <tr>
-                            <td>{{ $item->id }}</td>
-{{ tableColumns }}
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('admin.{{ modelVariablePlural }}.edit', $item->id) }}" class="btn btn-outline-primary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.{{ modelVariablePlural }}.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer bg-white border-top py-2">
-            {{ $items->links() }}
+        <div class="card-body p-0" id="table-container">
+            @include('admin.{{ modelVariablePlural }}.table')
         </div>
     </div>
 </div>
-@endsection
 
-{{ dataTablesScript }}
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Debounce function to limit ajax calls
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        // AJAX Search
+        $('#searchInput').on('keyup', debounce(function() {
+            var query = $(this).val();
+            fetchData(query);
+        }, 300));
+
+        function fetchData(query = '', page = 1) {
+            $.ajax({
+                url: "{{ route('admin.{{ modelVariablePlural }}.index') }}",
+                method: 'GET',
+                data: { search: query, page: page },
+                success: function(data) {
+                    $('#table-container').html(data);
+                }
+            });
+        }
+
+        // Pagination with AJAX
+        $(document).on('click', '.pagination a', function(event) {
+            event.preventDefault();
+            var page = $(this).attr('href').split('page=')[1];
+            var query = $('#searchInput').val();
+            fetchData(query, page);
+        });
+    });
+</script>
+@endpush
+@endsection
 
