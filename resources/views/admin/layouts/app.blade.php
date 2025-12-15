@@ -7,6 +7,20 @@
     @include('admin.layouts.styles')
 </head>
 <body class="bg-light">
+<div id="global-loader" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex justify-content-center align-items-center" style="z-index: 9999;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+<script>
+    window.addEventListener('load', function() {
+        const loader = document.getElementById('global-loader');
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 300);
+    });
+</script>
 <div class="d-flex" id="wrapper">
     @include('admin.layouts.sidebar')
     

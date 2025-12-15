@@ -20,7 +20,12 @@
                 </a>
             </div>
         </div>
-        <div class="card-body p-0" id="table-container">
+        <div class="card-body p-0" id="table-container" style="position: relative;">
+            <div id="search-loader" class="search-loader-overlay d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
             @include('admin.{{ modelVariablePlural }}.table')
         </div>
     </div>
@@ -46,12 +51,24 @@
         }, 300));
 
         function fetchData(query = '', page = 1) {
+            $('#search-loader').removeClass('d-none');
             $.ajax({
                 url: "{{ route('admin.{{ modelVariablePlural }}.index') }}",
                 method: 'GET',
                 data: { search: query, page: page },
                 success: function(data) {
                     $('#table-container').html(data);
+                    // Re-add loader element since it was replaced
+                    $('#table-container').prepend(`
+                        <div id="search-loader" class="search-loader-overlay d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    `);
+                },
+                complete: function() {
+                    $('#search-loader').addClass('d-none');
                 }
             });
         }
