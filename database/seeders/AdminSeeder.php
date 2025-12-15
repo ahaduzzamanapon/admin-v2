@@ -10,10 +10,16 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        Admin::create([
+        $admin = Admin::create([
             'name' => 'Admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
         ]);
+
+        // Assign Super Admin role
+        $superAdminRole = \App\Models\Role::where('name', 'Super Admin')->first();
+        if ($superAdminRole) {
+            $admin->roles()->attach($superAdminRole->id);
+        }
     }
 }

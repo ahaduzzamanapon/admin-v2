@@ -45,7 +45,16 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{ $users->links() }}
+            </div>
+            <div class="card-footer bg-white border-top py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }} entries
+                    </div>
+                    <div>
+                        {{ $users->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

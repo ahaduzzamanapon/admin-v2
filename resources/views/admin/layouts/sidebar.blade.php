@@ -1,5 +1,5 @@
 <div class="sidebar d-flex flex-column">
-    <div class="sidebar-header p-4 d-flex align-items-center justify-content-center border-bottom border-secondary border-opacity-25">
+    <div class="sidebar-header d-flex align-items-center justify-content-center border-bottom border-secondary border-opacity-25" style="padding: 11px;">
         @if(\App\Models\Setting::get('app_logo'))
             <img src="{{ asset('storage/' . \App\Models\Setting::get('app_logo')) }}" alt="Logo" width="40" height="40" class="me-2 rounded-circle">
         @else

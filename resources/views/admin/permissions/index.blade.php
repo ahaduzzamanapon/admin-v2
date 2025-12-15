@@ -41,7 +41,16 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{ $permissions->links() }}
+            </div>
+            <div class="card-footer bg-white border-top py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Showing {{ $permissions->firstItem() ?? 0 }} to {{ $permissions->lastItem() ?? 0 }} of {{ $permissions->total() }} entries
+                    </div>
+                    <div>
+                        {{ $permissions->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

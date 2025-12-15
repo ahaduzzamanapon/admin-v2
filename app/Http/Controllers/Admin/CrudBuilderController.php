@@ -106,6 +106,9 @@ class CrudBuilderController extends Controller
         // Add to menu
         $this->addToMenu($modelName);
 
+        // Generate Permissions
+        $this->generatePermissions($modelName);
+
         return redirect()->back()->with('success', 'CRUD generated successfully!');
     }
 
@@ -692,5 +695,18 @@ class CrudBuilderController extends Controller
         
         $testPath = base_path('tests/Feature/' . $modelName . 'Test.php');
         File::put($testPath, $testContent);
+    }
+
+    protected function generatePermissions($modelName)
+    {
+        $modelLower = Str::snake(Str::plural($modelName));
+        $permissions = ['browse', 'add', 'edit', 'delete'];
+
+        foreach ($permissions as $action) {
+            \App\Models\Permission::updateOrCreate(
+                ['name' => "{$modelLower}.{$action}"],
+                ['name' => "{$modelLower}.{$action}"]
+            );
+        }
     }
 }

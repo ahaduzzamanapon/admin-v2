@@ -47,7 +47,16 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{ $roles->links() }}
+            </div>
+            <div class="card-footer bg-white border-top py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Showing {{ $roles->firstItem() ?? 0 }} to {{ $roles->lastItem() ?? 0 }} of {{ $roles->total() }} entries
+                    </div>
+                    <div>
+                        {{ $roles->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
