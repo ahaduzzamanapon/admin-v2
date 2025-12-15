@@ -397,7 +397,7 @@ class CrudBuilderController extends Controller
         $tableColumns = [];
         // ... (Table headers/columns logic remains same) ...
         foreach ($fields as $field) {
-            $headerName = Str::title($field['name']);
+            $headerName = Str::title(str_replace('_', ' ', $field['name']));
             if ($field['db_type'] === 'foreignId' && Str::endsWith($field['name'], '_id')) {
                 $headerName = Str::title(Str::replaceLast('_id', '', $field['name']));
             }
