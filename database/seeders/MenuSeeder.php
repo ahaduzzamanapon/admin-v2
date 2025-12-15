@@ -17,27 +17,19 @@ class MenuSeeder extends Seeder
             'order' => 1,
         ]);
 
-        // Menu Builder
-        Menu::create([
-            'title' => 'Menu Builder',
-            'route' => 'admin.menus.index',
-            'icon' => 'bi bi-list',
-            'order' => 2,
-        ]);
-
         // User Management
         Menu::create([
             'title' => 'User Management',
             'route' => 'admin.users.index',
             'icon' => 'bi bi-people',
-            'order' => 3,
+            'order' => 2,
         ]);
 
         // Roles & Permissions
         $rolePermission = Menu::create([
             'title' => 'Roles & Permissions',
             'icon' => 'bi bi-shield-lock',
-            'order' => 4,
+            'order' => 3,
         ]);
 
         Menu::create([
@@ -54,28 +46,39 @@ class MenuSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // CRUD Builder
+        // Configurations
+        $configurations = Menu::create([
+            'title' => 'Configurations',
+            'icon' => 'fa-solid fa-house-flag',
+            'order' => 4,
+        ]);
+
+        Menu::create([
+            'title' => 'Menu Builder',
+            'route' => 'admin.menus.index',
+            'parent_id' => $configurations->id,
+            'order' => 1,
+        ]);
+
         Menu::create([
             'title' => 'CRUD Builder',
             'route' => 'crud-builder.index',
-            'icon' => 'bi bi-tools',
-            'order' => 5,
+            'parent_id' => $configurations->id,
+            'order' => 2,
         ]);
 
-        // Theme Settings
-        Menu::create([
-            'title' => 'Theme Settings',
-            'route' => 'admin.theme.index',
-            'icon' => 'bi bi-palette',
-            'order' => 6,
-        ]);
-
-        // General Settings
         Menu::create([
             'title' => 'Settings',
             'route' => 'admin.settings.index',
-            'icon' => 'bi bi-gear',
-            'order' => 7,
+            'parent_id' => $configurations->id,
+            'order' => 3,
+        ]);
+
+        Menu::create([
+            'title' => 'Theme Settings',
+            'route' => 'admin.theme.index',
+            'parent_id' => $configurations->id,
+            'order' => 4,
         ]);
     }
 }
