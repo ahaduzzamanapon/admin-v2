@@ -10,7 +10,7 @@
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="card-body">
+        <div class="card-body p-4">
             <form action="{{ route('admin.{{ modelVariablePlural }}.store') }}" method="POST" {{ enctype }}>
                 @csrf
                 <div class="row">

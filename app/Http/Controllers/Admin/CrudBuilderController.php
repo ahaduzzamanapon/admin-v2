@@ -358,7 +358,7 @@ class CrudBuilderController extends Controller
         $hasFile = false;
         $hasTextarea = false;
         foreach ($fields as $field) {
-            $colClass = ($field['html_type'] === 'textarea' || $field['html_type'] === 'editor') ? 'col-12' : 'col-md-6';
+            $colClass = ($field['html_type'] === 'textarea' || $field['html_type'] === 'editor') ? 'col-12' : 'col-md-4';
             $formFields[] = '            <div class="' . $colClass . ' mb-3">';
             $formFields[] = '                <label for="' . $field['name'] . '" class="form-label">' . Str::title(str_replace('_', ' ', $field['name'])) . '</label>';
             
