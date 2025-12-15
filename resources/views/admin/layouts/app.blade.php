@@ -13,13 +13,22 @@
     </div>
 </div>
 <script>
-    window.addEventListener('load', function() {
+    function hideLoader() {
         const loader = document.getElementById('global-loader');
-        loader.style.opacity = '0';
-        setTimeout(() => {
-            loader.style.display = 'none';
-        }, 300);
-    });
+        if (loader) {
+            loader.style.transition = 'opacity 0.5s ease';
+            loader.style.opacity = '0';
+            loader.style.pointerEvents = 'none';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    window.addEventListener('load', hideLoader);
+    
+    // Fallback if load event doesn't fire or takes too long
+    setTimeout(hideLoader, 3000); 
 </script>
 <div class="d-flex" id="wrapper">
     @include('admin.layouts.sidebar')
