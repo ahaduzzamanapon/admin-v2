@@ -81,6 +81,14 @@
                                     <input class="form-check-input" type="checkbox" id="test_cases" name="test_cases" value="1">
                                     <label class="form-check-label" for="test_cases">Test Cases</label>
                                 </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="searchable" name="searchable" value="1" checked>
+                                    <label class="form-check-label" for="searchable">Searchable</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="exportable" name="exportable" value="1" checked>
+                                    <label class="form-check-label" for="exportable">Exportable</label>
+                                </div>
                             </div>
                         </div>
                     </div>

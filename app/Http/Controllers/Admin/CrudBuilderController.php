@@ -55,6 +55,9 @@ class CrudBuilderController extends Controller
         $migration = $request->has('migration');
         $migrate = $request->has('migrate');
         $paginate = $request->input('paginate');
+        $searchable = $request->has('searchable'); // New Flag
+        $exportable = $request->has('exportable'); // New Flag
+        $testCases = $request->has('test_cases'); // New Flag
 
         // Prepare placeholders for stubs
         $modelVariable = Str::camel($modelName);
@@ -82,10 +85,15 @@ class CrudBuilderController extends Controller
         }
 
         // Generate Controller
-        $this->generateController($className, $modelName, $fields, $replacements);
+        $this->generateController($className, $modelName, $fields, $replacements, $searchable, $exportable);
 
         // Generate Views
-        $this->generateViews($modelName, $fields, $replacements);
+        $this->generateViews($modelName, $fields, $replacements, $searchable, $exportable, $datatables);
+
+        // Generate Test Cases
+        if ($testCases) {
+            $this->generateTestCases($modelName, $tableName, $fields, $replacements);
+        }
 
         // Run Migrations
         if ($migrate) {
@@ -101,10 +109,13 @@ class CrudBuilderController extends Controller
         return redirect()->back()->with('success', 'CRUD generated successfully!');
     }
 
+    // ... (addRoutes, addToMenu, generateModel, generateMigration methods remain unchanged) ...
     protected function addRoutes($modelName, $className)
     {
         $modelVariablePlural = Str::plural(Str::camel($modelName));
         $route = "Route::resource('{$modelVariablePlural}', App\\Http\\Controllers\\Admin\\{$className}::class)->names('admin.{$modelVariablePlural}');";
+        $route .= "\nRoute::get('{$modelVariablePlural}/export/pdf', [App\\Http\\Controllers\\Admin\\{$className}::class, 'exportPdf'])->name('admin.{$modelVariablePlural}.export.pdf');";
+        $route .= "\nRoute::get('{$modelVariablePlural}/export/excel', [App\\Http\\Controllers\\Admin\\{$className}::class, 'exportExcel'])->name('admin.{$modelVariablePlural}.export.excel');";
 
         $crudRoutesPath = base_path('routes/crud.php');
         
@@ -216,10 +227,11 @@ class CrudBuilderController extends Controller
         File::put($migrationPath, $migrationContent);
     }
 
-    protected function generateController($className, $modelName, $fields, $replacements)
+    protected function generateController($className, $modelName, $fields, $replacements, $searchable = true, $exportable = true)
     {
         $controllerStub = File::get(resource_path('stubs/controller.stub'));
 
+        // ... (Image handling logic remains same) ...
         $imageFields = [];
         foreach ($fields as $field) {
             if ($field['html_type'] === 'image') {
@@ -306,13 +318,69 @@ class CrudBuilderController extends Controller
              $replacements['{{ compact }}'] = '';
         }
 
+        // Search Logic
+        $searchLogic = '';
+        if ($searchable) {
+            $searchLogic = "        \$query = {$modelName}::query();\n";
+            $searchLogic .= "        if (\$request->has('search')) {\n";
+            $searchLogic .= "            \$search = \$request->input('search');\n";
+            $searchLogic .= "            \$query->where(function(\$q) use (\$search) {\n";
+            $first = true;
+            foreach ($fields as $field) {
+                if (in_array($field['db_type'], ['string', 'text'])) {
+                    if ($first) {
+                        $searchLogic .= "                \$q->where('{$field['name']}', 'like', \"%\$search%\")\n";
+                        $first = false;
+                    } else {
+                        $searchLogic .= "                  ->orWhere('{$field['name']}', 'like', \"%\$search%\")\n";
+                    }
+                }
+            }
+            $searchLogic .= "            });\n";
+            $searchLogic .= "        }\n";
+            $searchLogic .= "        \$items = \$query->paginate(10);";
+        } else {
+            $searchLogic = "        \$items = {$modelName}::paginate(10);";
+        }
+        $replacements['{{ searchLogic }}'] = $searchLogic;
+
+        // Export Methods
+        $exportMethods = '';
+        if ($exportable) {
+            $exportMethods .= "\n    public function exportPdf()\n";
+            $exportMethods .= "    {\n";
+            $exportMethods .= "        \$items = {$modelName}::all();\n";
+            $exportMethods .= "        \$pdf = \\Barryvdh\\DomPDF\\Facade\\Pdf::loadView('admin.{$replacements['{{ modelVariablePlural }}']}.pdf', compact('items'));\n";
+            $exportMethods .= "        return \$pdf->download('{$replacements['{{ modelVariablePlural }}']}.pdf');\n";
+            $exportMethods .= "    }\n\n";
+            
+            $exportMethods .= "    public function exportExcel()\n";
+            $exportMethods .= "    {\n";
+            $exportMethods .= "        // Excel export logic using maatwebsite/excel\n";
+            $exportMethods .= "        // For simplicity, we can use a simple CSV download or implement proper Excel export class later\n";
+            $exportMethods .= "        return response()->streamDownload(function () {\n";
+            $exportMethods .= "            \$items = {$modelName}::all();\n";
+            $exportMethods .= "            \$handle = fopen('php://output', 'w');\n";
+            $exportMethods .= "            // Add Header\n";
+            // ... Logic to add header row ...
+            $exportMethods .= "            fputcsv(\$handle, ['ID', " . implode(", ", array_map(function($f) { return "'".Str::title($f['name'])."'"; }, $fields)) . "]);\n";
+            $exportMethods .= "            foreach (\$items as \$item) {\n";
+            $exportMethods .= "                fputcsv(\$handle, [\$item->id, " . implode(", ", array_map(function($f) { return "\$item->{$f['name']}"; }, $fields)) . "]);\n";
+            $exportMethods .= "            }\n";
+            $exportMethods .= "            fclose(\$handle);\n";
+            $exportMethods .= "        }, '{$replacements['{{ modelVariablePlural }}']}.csv');\n";
+            $exportMethods .= "    }\n";
+        }
+        $replacements['{{ exportMethods }}'] = $exportMethods;
+
+
         $controllerContent = str_replace(array_keys($replacements), array_values($replacements), $controllerStub);
 
         $controllerPath = app_path('Http/Controllers/Admin/' . $className . '.php');
         File::put($controllerPath, $controllerContent);
     }
 
-    protected function generateViews($modelName, $fields, $replacements)
+    protected function generateViews($modelName, $fields, $replacements, $searchable = true, $exportable = true, $datatables = false)
     {
         $modelVariablePlural = Str::plural(Str::camel($modelName));
         $viewDirectory = resource_path('views/admin/' . $modelVariablePlural);
@@ -324,6 +392,7 @@ class CrudBuilderController extends Controller
         $indexStub = File::get(resource_path('stubs/index.stub'));
         $tableHeaders = [];
         $tableColumns = [];
+        // ... (Table headers/columns logic remains same) ...
         foreach ($fields as $field) {
             $headerName = Str::title($field['name']);
             if ($field['db_type'] === 'foreignId' && Str::endsWith($field['name'], '_id')) {
@@ -349,10 +418,86 @@ class CrudBuilderController extends Controller
         }
         $replacements['{{ tableHeaders }}'] = implode("\n", $tableHeaders);
         $replacements['{{ tableColumns }}'] = implode("\n", $tableColumns);
+
+        // Inject Search Form
+        $searchForm = '';
+        if ($searchable) {
+            $searchForm = '            <form action="{{ route(\'admin.' . $modelVariablePlural . '.index\') }}" method="GET" class="d-flex gap-2">';
+            $searchForm .= '                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ request(\'search\') }}">';
+            $searchForm .= '                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>';
+            $searchForm .= '            </form>';
+        }
+        $replacements['{{ searchForm }}'] = $searchForm;
+
+        // Inject Export Buttons
+        $exportButtons = '';
+        if ($exportable) {
+            $exportButtons = '            <div class="btn-group btn-group-sm ms-2">';
+            $exportButtons .= '                <a href="{{ route(\'admin.' . $modelVariablePlural . '.export.pdf\') }}" class="btn btn-outline-danger"><i class="bi bi-file-pdf"></i> PDF</a>';
+            $exportButtons .= '                <a href="{{ route(\'admin.' . $modelVariablePlural . '.export.excel\') }}" class="btn btn-outline-success"><i class="bi bi-file-excel"></i> Excel</a>';
+            $exportButtons .= '            </div>';
+        }
+        $replacements['{{ exportButtons }}'] = $exportButtons;
+
+        $replacements['{{ exportButtons }}'] = $exportButtons;
+
+        // Inject DataTables Script
+        $dataTablesScript = '';
+        if ($datatables) {
+            $dataTablesScript = "
+@push('scripts')
+<link href=\"https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css\" rel=\"stylesheet\">
+<script src=\"https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js\"></script>
+<script src=\"https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js\"></script>
+<script>
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            \"paging\": true,
+            \"lengthChange\": true,
+            \"searching\": true,
+            \"ordering\": true,
+            \"info\": true,
+            \"autoWidth\": false,
+            \"responsive\": true,
+            \"language\": {
+                \"search\": \"_INPUT_\",
+                \"searchPlaceholder\": \"Search records...\"
+            }
+        });
+    });
+</script>
+@endpush
+";
+        }
+        $replacements['{{ dataTablesScript }}'] = $dataTablesScript;
+
         $indexContent = str_replace(array_keys($replacements), array_values($replacements), $indexStub);
         File::put($viewDirectory . '/index.blade.php', $indexContent);
 
-        // Generate create view
+        // Generate PDF View
+        if ($exportable) {
+            $pdfStub = File::get(resource_path('stubs/pdf.stub'));
+            // Reuse table headers/columns logic but stripped of HTML for PDF if needed, or keep simple
+            // For PDF we might want simpler table
+            $pdfHeaders = [];
+            $pdfColumns = [];
+            foreach ($fields as $field) {
+                 $headerName = Str::title($field['name']);
+                 $pdfHeaders[] = '                <th>' . $headerName . '</th>';
+                 $pdfColumns[] = '                <td>{{ $item->' . $field['name'] . ' }}</td>';
+            }
+            
+            $replacements['{{ tableHeaders }}'] = implode("\n", $pdfHeaders);
+            $replacements['{{ tableColumns }}'] = implode("\n", $pdfColumns);
+            $replacements['{{ appName }}'] = config('app.name', 'Laravel');
+            $replacements['{{ date }}'] = date('Y-m-d H:i:s');
+
+            $pdfContent = str_replace(array_keys($replacements), array_values($replacements), $pdfStub);
+            File::put($viewDirectory . '/pdf.blade.php', $pdfContent);
+        }
+
+        // Generate create view (unchanged)
+        // ... (create view generation logic) ...
         $createStub = File::get(resource_path('stubs/create.stub'));
         $formFields = [];
         $hasFile = false;
@@ -431,7 +576,8 @@ class CrudBuilderController extends Controller
         $createContent = str_replace(array_keys($replacements), array_values($replacements), $createStub);
         File::put($viewDirectory . '/create.blade.php', $createContent);
 
-        // Generate edit view
+        // Generate edit view (unchanged)
+        // ... (edit view generation logic) ...
         $editStub = File::get(resource_path('stubs/edit.stub'));
         $formFields = [];
         $hasFile = false;
@@ -509,5 +655,29 @@ class CrudBuilderController extends Controller
 
         $editContent = str_replace(array_keys($replacements), array_values($replacements), $editStub);
         File::put($viewDirectory . '/edit.blade.php', $editContent);
+    }
+    protected function generateTestCases($modelName, $tableName, $fields, $replacements)
+    {
+        $testStub = File::get(resource_path('stubs/test.stub'));
+        
+        // Generate dummy data for factory/tests
+        $factoryData = [];
+        foreach ($fields as $field) {
+            if ($field['name'] === 'id' || $field['name'] === 'created_at' || $field['name'] === 'updated_at') continue;
+            
+            $value = "''";
+            if ($field['db_type'] === 'string') $value = "'Test " . Str::title($field['name']) . "'";
+            if ($field['db_type'] === 'text') $value = "'Test Content'";
+            if ($field['db_type'] === 'integer') $value = "1";
+            if ($field['db_type'] === 'boolean') $value = "1";
+            
+            $factoryData[] = "'{$field['name']}' => $value";
+        }
+        $replacements['{{ factoryData }}'] = '[' . implode(', ', $factoryData) . ']';
+
+        $testContent = str_replace(array_keys($replacements), array_values($replacements), $testStub);
+        
+        $testPath = base_path('tests/Feature/' . $modelName . 'Test.php');
+        File::put($testPath, $testContent);
     }
 }

@@ -172,6 +172,21 @@
         flex-direction: column;
     }
 
+    @media (max-width: 768px) {
+        .sidebar {
+            margin-left: -280px;
+        }
+        #wrapper.toggled .sidebar {
+            margin-left: 0;
+        }
+    }
+
+    @media (min-width: 769px) {
+        #wrapper.toggled .sidebar {
+            margin-left: -280px;
+        }
+    }
+
     .sidebar .nav-link {
         color: var(--sidebar-text-color);
         padding: 0.75rem 1rem;
@@ -272,7 +287,7 @@
     }
 
     /* Full Height Cards for Tables */
-    .container-fluid > .card {
+    .container-fluid > .card.card-fixed {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -280,7 +295,7 @@
         margin-bottom: 0 !important;
     }
 
-    .container-fluid > .card > .card-body {
+    .container-fluid > .card.card-fixed > .card-body {
         flex: 1;
         overflow: hidden; /* Internal scroll handles table */
         padding: 0;

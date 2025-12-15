@@ -9,7 +9,7 @@
         </div>
     @endif
 
-    <div class="card shadow-sm border-0">
+    <div class="card card-fixed shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 text-gray-800 fw-bold">Permission Management</h5>
             <a href="{{ route('admin.permissions.create') }}" class="btn btn-primary btn-sm">
