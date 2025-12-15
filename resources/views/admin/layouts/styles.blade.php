@@ -190,8 +190,8 @@
 
     .sidebar .nav-link {
         color: var(--sidebar-text-color);
-        padding: 0.75rem 1rem;
-        margin: 0.25rem 0.75rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0.15rem 0.5rem;
         border-radius: 0.5rem;
         transition: all 0.2s ease;
         display: flex;

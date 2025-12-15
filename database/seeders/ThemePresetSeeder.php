@@ -31,6 +31,11 @@ class ThemePresetSeeder extends Seeder
                     'navbar_text_color' => '#212529',
                 ]
             ],
+
+            
+
+
+
             [
                 'name' => 'Dark Mode',
                 'is_default' => true,
