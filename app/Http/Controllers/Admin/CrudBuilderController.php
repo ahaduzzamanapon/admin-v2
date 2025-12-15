@@ -516,9 +516,9 @@ class CrudBuilderController extends Controller
             
             if ($field['html_type'] === 'textarea') {
                 $hasTextarea = true;
-                $formFields[] = '                <textarea class="form-control editor" id="' . $field['name'] . '" name="' . $field['name'] . '" rows="3"></textarea>';
+                $formFields[] = '                <textarea class="form-control editor @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '" rows="3">{{ old(\'' . $field['name'] . '\') }}</textarea>';
             } else if ($field['html_type'] === 'image') {
-                $formFields[] = '                <input type="file" class="form-control" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <input type="file" class="form-control @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $hasFile = true;
             } else if ($field['db_type'] === 'foreignId') {
                 $relationName = Str::camel(str_replace('_id', '', $field['name']));
@@ -530,14 +530,14 @@ class CrudBuilderController extends Controller
                         $displayCol = $parts[1];
                     }
                 }
-                $formFields[] = '                <select class="form-select" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <select class="form-select @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $formFields[] = '                    <option value="">Select ' . Str::title($relationName) . '</option>';
                 $formFields[] = '                    @foreach($' . $pluralRelation . ' as $item)';
-                $formFields[] = '                        <option value="{{ $item->id }}">{{ $item->' . $displayCol . ' }}</option>';
+                $formFields[] = '                        <option value="{{ $item->id }}" {{ old(\'' . $field['name'] . '\') == $item->id ? \'selected\' : \'\' }}>{{ $item->' . $displayCol . ' }}</option>';
                 $formFields[] = '                    @endforeach';
                 $formFields[] = '                </select>';
             } else if ($field['html_type'] === 'select') {
-                $formFields[] = '                <select class="form-select" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <select class="form-select @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $formFields[] = '                    <option value="">Select ' . Str::title($field['name']) . '</option>';
                 if (!empty($field['options'])) {
                     $options = explode(',', $field['options']);
@@ -545,7 +545,7 @@ class CrudBuilderController extends Controller
                         $parts = explode(':', $option);
                         $val = $parts[0];
                         $label = isset($parts[1]) ? $parts[1] : $val;
-                        $formFields[] = '                    <option value="' . $val . '">' . $label . '</option>';
+                        $formFields[] = '                    <option value="' . $val . '" {{ old(\'' . $field['name'] . '\') == \'' . $val . '\' ? \'selected\' : \'\' }}>' . $label . '</option>';
                     }
                 }
                 $formFields[] = '                </select>';
@@ -557,7 +557,7 @@ class CrudBuilderController extends Controller
                         $val = $parts[0];
                         $label = isset($parts[1]) ? $parts[1] : $val;
                         $formFields[] = '                <div class="form-check form-check-inline">';
-                        $formFields[] = '                    <input class="form-check-input" type="radio" name="' . $field['name'] . '" id="' . $field['name'] . '_' . $val . '" value="' . $val . '">';
+                        $formFields[] = '                    <input class="form-check-input @error(\'' . $field['name'] . '\') is-invalid @enderror" type="radio" name="' . $field['name'] . '" id="' . $field['name'] . '_' . $val . '" value="' . $val . '" {{ old(\'' . $field['name'] . '\') == \'' . $val . '\' ? \'checked\' : \'\' }}>';
                         $formFields[] = '                    <label class="form-check-label" for="' . $field['name'] . '_' . $val . '">' . $label . '</label>';
                         $formFields[] = '                </div>';
                     }
@@ -565,12 +565,15 @@ class CrudBuilderController extends Controller
             } else if ($field['html_type'] === 'checkbox') {
                 $formFields[] = '                <div class="form-check form-switch">';
                 $formFields[] = '                    <input type="hidden" name="' . $field['name'] . '" value="0">';
-                $formFields[] = '                    <input class="form-check-input" type="checkbox" id="' . $field['name'] . '" name="' . $field['name'] . '" value="1">';
+                $formFields[] = '                    <input class="form-check-input @error(\'' . $field['name'] . '\') is-invalid @enderror" type="checkbox" id="' . $field['name'] . '" name="' . $field['name'] . '" value="1" {{ old(\'' . $field['name'] . '\') ? \'checked\' : \'\' }}>';
                 $formFields[] = '                    <label class="form-check-label" for="' . $field['name'] . '">' . Str::title($field['name']) . '</label>';
                 $formFields[] = '                </div>';
             } else {
-                $formFields[] = '                <input type="' . $field['html_type'] . '" class="form-control" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <input type="' . $field['html_type'] . '" class="form-control @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '" value="{{ old(\'' . $field['name'] . '\') }}">';
             }
+            $formFields[] = '                @error(\'' . $field['name'] . '\')';
+            $formFields[] = '                    <div class="invalid-feedback">{{ $message }}</div>';
+            $formFields[] = '                @enderror';
             $formFields[] = '            </div>';
         }
         $replacements['{{ formFields }}'] = implode("\n", $formFields);
@@ -595,9 +598,9 @@ class CrudBuilderController extends Controller
             $formFields[] = '                <label for="' . $field['name'] . '" class="form-label">' . Str::title(str_replace('_', ' ', $field['name'])) . '</label>';
             if ($field['html_type'] === 'textarea') {
                 $hasTextarea = true;
-                $formFields[] = '                <textarea class="form-control editor" id="' . $field['name'] . '" name="' . $field['name'] . '" rows="3">{{ $item->' . $field['name'] . ' }}</textarea>';
+                $formFields[] = '                <textarea class="form-control editor @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '" rows="3">{{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') }}</textarea>';
             } else if ($field['html_type'] === 'image') {
-                $formFields[] = '                <input type="file" class="form-control" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <input type="file" class="form-control @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $formFields[] = '                <img src="{{ asset(\'storage/\' . $item->' . $field['name'] . ') }}" width="100" class="mt-2 rounded" />';
                 $hasFile = true;
             } else if ($field['db_type'] === 'foreignId') {
@@ -610,14 +613,14 @@ class CrudBuilderController extends Controller
                         $displayCol = $parts[1];
                     }
                 }
-                $formFields[] = '                <select class="form-select" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <select class="form-select @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $formFields[] = '                    <option value="">Select ' . Str::title($relationName) . '</option>';
                 $formFields[] = '                    @foreach($' . $pluralRelation . ' as $relItem)';
-                $formFields[] = '                        <option value="{{ $relItem->id }}" {{ $item->' . $field['name'] . ' == $relItem->id ? \'selected\' : \'\' }}>{{ $relItem->' . $displayCol . ' }}</option>';
+                $formFields[] = '                        <option value="{{ $relItem->id }}" {{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') == $relItem->id ? \'selected\' : \'\' }}>{{ $relItem->' . $displayCol . ' }}</option>';
                 $formFields[] = '                    @endforeach';
                 $formFields[] = '                </select>';
             } else if ($field['html_type'] === 'select') {
-                $formFields[] = '                <select class="form-select" id="' . $field['name'] . '" name="' . $field['name'] . '">';
+                $formFields[] = '                <select class="form-select @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '">';
                 $formFields[] = '                    <option value="">Select ' . Str::title($field['name']) . '</option>';
                 if (!empty($field['options'])) {
                     $options = explode(',', $field['options']);
@@ -625,7 +628,7 @@ class CrudBuilderController extends Controller
                         $parts = explode(':', $option);
                         $val = $parts[0];
                         $label = isset($parts[1]) ? $parts[1] : $val;
-                        $formFields[] = '                    <option value="' . $val . '" {{ $item->' . $field['name'] . ' == \'' . $val . '\' ? \'selected\' : \'\' }}>' . $label . '</option>';
+                        $formFields[] = '                    <option value="' . $val . '" {{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') == \'' . $val . '\' ? \'selected\' : \'\' }}>' . $label . '</option>';
                     }
                 }
                 $formFields[] = '                </select>';
@@ -637,7 +640,7 @@ class CrudBuilderController extends Controller
                         $val = $parts[0];
                         $label = isset($parts[1]) ? $parts[1] : $val;
                         $formFields[] = '                <div class="form-check form-check-inline">';
-                        $formFields[] = '                    <input class="form-check-input" type="radio" name="' . $field['name'] . '" id="' . $field['name'] . '_' . $val . '" value="' . $val . '" {{ $item->' . $field['name'] . ' == \'' . $val . '\' ? \'checked\' : \'\' }}>';
+                        $formFields[] = '                    <input class="form-check-input @error(\'' . $field['name'] . '\') is-invalid @enderror" type="radio" name="' . $field['name'] . '" id="' . $field['name'] . '_' . $val . '" value="' . $val . '" {{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') == \'' . $val . '\' ? \'checked\' : \'\' }}>';
                         $formFields[] = '                    <label class="form-check-label" for="' . $field['name'] . '_' . $val . '">' . $label . '</label>';
                         $formFields[] = '                </div>';
                     }
@@ -645,12 +648,15 @@ class CrudBuilderController extends Controller
             } else if ($field['html_type'] === 'checkbox') {
                 $formFields[] = '                <div class="form-check form-switch">';
                 $formFields[] = '                    <input type="hidden" name="' . $field['name'] . '" value="0">';
-                $formFields[] = '                    <input class="form-check-input" type="checkbox" id="' . $field['name'] . '" name="' . $field['name'] . '" value="1" {{ $item->' . $field['name'] . ' ? \'checked\' : \'\' }}>';
+                $formFields[] = '                    <input class="form-check-input @error(\'' . $field['name'] . '\') is-invalid @enderror" type="checkbox" id="' . $field['name'] . '" name="' . $field['name'] . '" value="1" {{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') ? \'checked\' : \'\' }}>';
                 $formFields[] = '                    <label class="form-check-label" for="' . $field['name'] . '">' . Str::title($field['name']) . '</label>';
                 $formFields[] = '                </div>';
             } else {
-                $formFields[] = '                <input type="' . $field['html_type'] . '" class="form-control" id="' . $field['name'] . '" name="' . $field['name'] . '" value="{{ $item->' . $field['name'] . ' }}">';
+                $formFields[] = '                <input type="' . $field['html_type'] . '" class="form-control @error(\'' . $field['name'] . '\') is-invalid @enderror" id="' . $field['name'] . '" name="' . $field['name'] . '" value="{{ old(\'' . $field['name'] . '\', $item->' . $field['name'] . ') }}">';
             }
+            $formFields[] = '                @error(\'' . $field['name'] . '\')';
+            $formFields[] = '                    <div class="invalid-feedback">{{ $message }}</div>';
+            $formFields[] = '                @enderror';
             $formFields[] = '            </div>';
         }
         $replacements['{{ formFields }}'] = implode("\n", $formFields);
