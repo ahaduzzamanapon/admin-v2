@@ -9,62 +9,80 @@
         </div>
     @endif
 
-    <div class="card card-fixed shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 text-gray-800 fw-bold">Menu Builder</h5>
-            <a href="{{ route('admin.menus.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-lg me-1"></i> Add New Menu
-            </a>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Route</th>
-                            <th>Icon</th>
-                            <th>Order</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($menus as $menu)
-                            <tr>
-                                <td>{{ $menu->title }}</td>
-                                <td>{{ $menu->route }}</td>
-                                <td><i class="{{ $menu->icon }}"></i> {{ $menu->icon }}</td>
-                                <td>{{ $menu->order }}</td>
-                                <td>
-                                    <a href="{{ route('admin.menus.edit', $menu->id) }}" class="btn btn-sm btn-info">Edit</a>
-                                    <form action="{{ route('admin.menus.destroy', $menu->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @foreach($menu->children as $child)
-                                <tr>
-                                    <td>— {{ $child->title }}</td>
-                                    <td>{{ $child->route }}</td>
-                                    <td><i class="{{ $child->icon }}"></i> {{ $child->icon }}</td>
-                                    <td>{{ $child->order }}</td>
-                                    <td>
-                                        <a href="{{ route('admin.menus.edit', $child->id) }}" class="btn btn-sm btn-info">Edit</a>
-                                        <form action="{{ route('admin.menus.destroy', $child->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-gray-800 fw-bold">Menu Builder</h5>
+                    <div>
+                        <button id="saveOrder" class="btn btn-success btn-sm me-2" style="display: none;">
+                            <i class="bi bi-check-lg me-1"></i> Save Order
+                        </button>
+                        <a href="{{ route('admin.menus.create') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Add New Menu
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="dd" id="menu-nestable">
+                        <ol class="dd-list">
+                            @foreach($menus as $menu)
+                                @include('admin.menus.item', ['menu' => $menu])
                             @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
+                        </ol>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+<style>
+    .dd { max-width: 100%; }
+    .dd-handle { 
+        height: auto; 
+        padding: 10px 15px; 
+        border: 1px solid #e5e7eb; 
+        background: #fff; 
+        border-radius: 4px; 
+        margin-bottom: 10px;
+        cursor: move;
+    }
+    .dd-handle:hover { background: #f8f9fa; }
+    .dd-item > button { margin-top: 8px; }
+    .dd-placeholder { border: 1px dashed #ccc; background: #f8f9fa; }
+</style>
+<script>
+    $(document).ready(function() {
+        $('#menu-nestable').nestable({
+            maxDepth: 5
+        }).on('change', function() {
+            $('#saveOrder').fadeIn();
+        });
+
+        $('#saveOrder').click(function() {
+            var serializedData = $('#menu-nestable').nestable('serialize');
+            
+            $.ajax({
+                url: "{{ route('admin.menus.order') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    order: serializedData
+                },
+                success: function(response) {
+                    $('#saveOrder').fadeOut();
+                    alert('Menu order saved successfully!');
+                },
+                error: function() {
+                    alert('Error saving menu order.');
+                }
+            });
+        });
+    });
+</script>
+@endpush
 @endsection

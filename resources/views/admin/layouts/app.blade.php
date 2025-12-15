@@ -3,7 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Panel</title>
+    <title>{{ \App\Models\Setting::get('browser_title', \App\Models\Setting::get('app_name', config('app.name'))) }}</title>
+    @if(\App\Models\Setting::get('favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . \App\Models\Setting::get('favicon')) }}">
+    @endif
     @include('admin.layouts.styles')
 </head>
 <body class="bg-light">

@@ -1,7 +1,11 @@
 <div class="sidebar d-flex flex-column">
     <div class="sidebar-header p-4 d-flex align-items-center justify-content-center border-bottom border-secondary border-opacity-25">
-        <i class="bi bi-hexagon-fill fs-3 me-2 text-primary"></i>
-        <h4 class="mb-0 fw-bold tracking-tight">Apolo</h4>
+        @if(\App\Models\Setting::get('app_logo'))
+            <img src="{{ asset('storage/' . \App\Models\Setting::get('app_logo')) }}" alt="Logo" width="40" height="40" class="me-2 rounded-circle">
+        @else
+            <i class="bi bi-hexagon-fill fs-3 me-2 text-primary"></i>
+        @endif
+        <h4 class="mb-0 fw-bold tracking-tight">{{ \App\Models\Setting::get('app_name', config('app.name')) }}</h4>
     </div>
     
     <div class="sidebar-content flex-grow-1 overflow-auto py-3">

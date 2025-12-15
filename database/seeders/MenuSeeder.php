@@ -69,5 +69,13 @@ class MenuSeeder extends Seeder
             'icon' => 'bi bi-palette',
             'order' => 6,
         ]);
+
+        // General Settings
+        Menu::create([
+            'title' => 'Settings',
+            'route' => 'admin.settings.index',
+            'icon' => 'bi bi-gear',
+            'order' => 7,
+        ]);
     }
 }

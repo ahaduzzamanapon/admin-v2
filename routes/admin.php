@@ -11,6 +11,7 @@ Route::prefix('admin')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         
+        Route::post('menus/order', [\App\Http\Controllers\Admin\MenuController::class, 'updateOrder'])->name('admin.menus.order');
         Route::resource('menus', \App\Http\Controllers\Admin\MenuController::class)->names('admin.menus');
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->names('admin.users');
         Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)->names('admin.roles');
@@ -29,6 +30,9 @@ Route::prefix('admin')->group(function () {
         Route::get('theme/preset/{id}/edit', [\App\Http\Controllers\Admin\ThemeController::class, 'editPreset'])->name('admin.theme.preset.edit');
         Route::put('theme/preset/{id}', [\App\Http\Controllers\Admin\ThemeController::class, 'updatePreset'])->name('admin.theme.preset.update');
         Route::delete('theme/preset/{id}', [\App\Http\Controllers\Admin\ThemeController::class, 'destroyPreset'])->name('admin.theme.preset.destroy');
+
+        Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
 
         require base_path('routes/crud.php');
     });
