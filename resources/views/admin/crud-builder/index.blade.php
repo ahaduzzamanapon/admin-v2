@@ -359,6 +359,22 @@
     $('#menu_icon').on('input', function() {
         $('#icon_preview').attr('class', $(this).val());
     });
+
+    // Auto-format Field Name to snake_case
+    $(document).on('input', 'input[name^="fields"][name$="[name]"]', function() {
+        let value = $(this).val();
+        // Replace spaces and special chars with underscores, keep alphanumeric
+        let snakeCase = value.replace(/([a-z])([A-Z])/g, '$1_$2') // Handle camelCase
+                             .replace(/\s+/g, '_')                 // Replace spaces with underscores
+                             .replace(/[^a-zA-Z0-9_]/g, '')        // Remove non-alphanumeric chars (except underscore)
+                             .toLowerCase();                       // Convert to lowercase
+        
+        // Only update if the value actually changed to avoid cursor jumping issues if possible,
+        // though direct replacement is usually fine for this simple logic.
+        if (value !== snakeCase) {
+             $(this).val(snakeCase);
+        }
+    });
   });
 </script>
 @endsection
